@@ -2,6 +2,7 @@ package hr.algebra.tracefood.webapp.controller;
 
 import hr.algebra.tracefood.webapp.model.*;
 import hr.algebra.tracefood.webapp.service.*;
+import io.prometheus.client.Gauge;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -30,6 +31,12 @@ public class SignController {
 
     @Autowired
     public SellerService sellerService;
+
+    //metric
+    Gauge isLogged = Gauge.build()
+            .name("is_logged")
+            .help("Status of connexion")
+            .register();
 
     @GetMapping("/signIn")
     public String signIn(Model model) {
@@ -82,7 +89,7 @@ public class SignController {
             Seller newSeller = sellerService.createSellerOptimized(emailAddress, password, companyName, companyAddress, SellerType.valueOf(type));
             session.setAttribute("user", newSeller);
             session.setAttribute("userType", UserType.SELLER.toString());
-
+            isLogged.set(1);
             return "redirect:/userHomePage";
 
         } else {
@@ -113,7 +120,7 @@ public class SignController {
             Processor newProcessor = processorService.createProcessorOptimized(emailAddress, password, companyName, companyAddress, ProcessorType.valueOf(type));
             session.setAttribute("user", newProcessor);
             session.setAttribute("userType", UserType.PROCESSOR.toString());
-
+            isLogged.set(1);
             return "redirect:/userHomePage";
 
         } else {
@@ -145,7 +152,7 @@ public class SignController {
             Producer newProducer = producerService.createProducerOptimized(emailAddress, password, companyName, companyAddress, ProducerType.valueOf(type));
             session.setAttribute("userType", UserType.PRODUCER.toString());
             session.setAttribute("user", newProducer);
-
+            isLogged.set(1);
             return "redirect:/userHomePage";
 
         } else {
@@ -178,7 +185,7 @@ public class SignController {
             HoReCa newHoReCa = hoReCaService.createHoReCaOptimized(emailAddress, password, companyName, companyAddress, HoReCaType.valueOf(type));
             session.setAttribute("userType", UserType.HORECA.toString());
             session.setAttribute("user", newHoReCa);
-
+            isLogged.set(1);
             return "redirect:/userHomePage";
 
         } else {
@@ -212,6 +219,7 @@ public class SignController {
                 if (connexionSuccessful) {
                     session.setAttribute("userType", type);
                     session.setAttribute("user", rightSeller);
+                    isLogged.set(1);
                     return "redirect:/userHomePage";
                 } else {
                     model.addAttribute("error", true);
@@ -231,6 +239,7 @@ public class SignController {
                 if (connexionSuccessful) {
                     session.setAttribute("user", rightProcessor);
                     session.setAttribute("userType", type);
+                    isLogged.set(1);
                     return "redirect:/userHomePage";
                 } else {
                     model.addAttribute("error", true);
@@ -250,6 +259,7 @@ public class SignController {
                 if (connexionSuccessful) {
                     session.setAttribute("userType", type);
                     session.setAttribute("user", rightProducer);
+                    isLogged.set(1);
                     return "redirect:/userHomePage";
                 } else {
                     model.addAttribute("error", true);
@@ -269,6 +279,7 @@ public class SignController {
                 if (connexionSuccessful) {
                     session.setAttribute("userType", type);
                     session.setAttribute("user", rightHoReCa);
+                    isLogged.set(1);
                     return "redirect:/userHomePage";
                 } else {
                     model.addAttribute("error", true);
@@ -286,6 +297,7 @@ public class SignController {
         HttpSession session = request.getSession();
         session.removeAttribute("user");
         session.removeAttribute("userType");
+        isLogged.set(0);
         return "redirect:/homePage";
     }
 

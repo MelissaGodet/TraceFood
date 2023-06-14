@@ -1,4 +1,4 @@
-package hr.algebra.tracefood.webapp.controller;
+package hr.algebra.tracefood.webapp.Aspects;
 
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.*;

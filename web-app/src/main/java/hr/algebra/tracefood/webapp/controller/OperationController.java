@@ -2,6 +2,12 @@ package hr.algebra.tracefood.webapp.controller;
 
 import hr.algebra.tracefood.webapp.model.*;
 import hr.algebra.tracefood.webapp.service.*;
+import io.micrometer.core.annotation.Counted;
+import io.micrometer.core.annotation.Timed;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
+import io.prometheus.client.Counter;
+import io.prometheus.client.Histogram;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,6 +24,11 @@ import java.util.List;
 
 @Controller
 public class OperationController {
+
+    //metric
+    private static final Counter operationsCounter = Counter.build().name("operation_counter")
+            .help("Count the number of operation")
+            .register();
 
     @Autowired
     private HttpServletRequest request;
@@ -42,17 +53,19 @@ public class OperationController {
         return "addATransport";
     }
 
-
     @PostMapping("/addAProduction")
+
     public String addANewProduction(@RequestParam("productName") String productName,
                                     @RequestParam("description") String description,
-                                    @RequestParam("dateOfCreation") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)LocalDate productionDate,
+                                    @RequestParam("dateOfCreation") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate productionDate,
                                     @RequestParam("productType") String productType,
                                     @RequestParam("isFinishedProduct") boolean isFinishedProduct) {
         HttpSession session = request.getSession();
         Producer producer = (Producer) session.getAttribute("user");
         ProductionService productionService = new ProductionService();
+        operationsCounter.inc();
         productionService.createProductionOptimized(description, producer, productionDate, productName, ProductType.valueOf(productType), isFinishedProduct);
+
         return "redirect:/userHomePage";
     }
 
@@ -64,7 +77,7 @@ public class OperationController {
                                     @RequestParam("dateOfProcessing") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)LocalDate processingDate,
                                     @RequestParam("productType") String newProductType,
                                     @RequestParam("isFinishedProduct") boolean isNewFinishedProduct) {
-
+        operationsCounter.inc();
         HttpSession session = request.getSession();
         Processor processor = (Processor) session.getAttribute("user");
         ProcessingService processingService = new ProcessingService();
@@ -82,7 +95,7 @@ public class OperationController {
             @RequestParam("arrivalDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)LocalDate arrivalDate,
             @RequestParam("receiverID") Long receiverID) {
 
-
+        operationsCounter.inc();
         HttpSession session = request.getSession();
         Object userObject = session.getAttribute("user");
         User sender = new User();

@@ -2,6 +2,7 @@ package hr.algebra.tracefood.webapp.controller;
 
 import hr.algebra.tracefood.webapp.model.*;
 import hr.algebra.tracefood.webapp.service.*;
+import io.prometheus.client.Summary;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +35,11 @@ public class AccountController {
 
     @Autowired
     private ProcessingService processingService;
+
+    private static final Summary getHistoryLatency = Summary.build()
+            .name("history_latency_counter")
+            .help("Calculation latency of the History in seconds")
+            .register();
 
 
     @GetMapping("/accountInformation")
@@ -82,6 +88,7 @@ public class AccountController {
 
     public String history(Model model) {
 
+        Summary.Timer timer = getHistoryLatency.startTimer();
         HttpSession session = request.getSession();
         Object userObject = session.getAttribute("user");
         User user = new User();
@@ -127,6 +134,8 @@ public class AccountController {
 
         sortOperations(operations);
         model.addAttribute("operations", operations);
+        double latency = timer.observeDuration();
+        System.out.println("Latency to get the history of the account : " + latency + " seconds");
         return "history";
     }
 

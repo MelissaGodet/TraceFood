@@ -2,6 +2,8 @@ package hr.algebra.tracefood.webapp.controller;
 
 import hr.algebra.tracefood.webapp.model.*;
 import hr.algebra.tracefood.webapp.service.*;
+import io.prometheus.client.Histogram;
+import io.prometheus.client.Summary;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -29,6 +31,11 @@ public class ProductController {
     @Autowired
     private ProcessingService processingService;
 
+    private static final Summary getProductLatency = Summary.build()
+            .name("latency_counter")
+            .help("Calculation latency of functions that give the info about a product in seconds")
+            .register();
+
 
     @GetMapping("/informationAboutAProduct")
     public String informationAboutAProduct() {
@@ -53,15 +60,21 @@ public class ProductController {
 
     @PostMapping("/informationAboutAProduct")
     public String searchForAProduct(Model model, @RequestParam("productId") Long productId) {
+        Summary.Timer timer = getProductLatency.startTimer();
         List<OperationDisplay> operations = getOperations(productId);
         model.addAttribute("operations", operations);
+        double latency = timer.observeDuration();
+        System.out.println("Latency to get the information about the product : " + latency + " seconds");
         return "informationAboutAProduct";
     }
 
     @PostMapping("/userInformationAboutAProduct")
     public String userSearchForAProduct(Model model, @RequestParam("productId") Long productId) {
+        Summary.Timer timer = getProductLatency.startTimer();
         List<OperationDisplay> operations = getOperations(productId);
         model.addAttribute("operations", operations);
+        double latency = timer.observeDuration();
+        System.out.println("Latency to get the information about the product : " + latency + " seconds");
         return "userInformationAboutAProduct";
     }
 
