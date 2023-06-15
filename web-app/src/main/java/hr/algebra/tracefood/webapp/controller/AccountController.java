@@ -15,6 +15,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static hr.algebra.tracefood.webapp.model.OperationDisplay.sortOperations;
 
@@ -36,12 +39,14 @@ public class AccountController {
     @Autowired
     private ProcessingService processingService;
 
+    //metric
     private static final Summary getHistoryLatency = Summary.build()
             .name("history_latency_counter")
             .help("Calculation latency of the History in seconds")
             .register();
 
 
+    //functional programming
     @GetMapping("/accountInformation")
     public String accountInformation(Model model) {
 
@@ -49,32 +54,34 @@ public class AccountController {
         Object userObject = session.getAttribute("user");
         User user = new User();
         String userType = (String) session.getAttribute("userType");
+
+        BiConsumer<User, Model> attributeSetter = (usr, mdl) -> {
+            mdl.addAttribute("companyName", usr.getCompanyName());
+            mdl.addAttribute("companyAddress", usr.getEmailAddress());
+        };
+
         if (userType != null) {
             switch (userType) {
                 case "Seller":
                     Seller seller = (Seller) userObject;
                     user = seller.getUser();
-                    model.addAttribute("companyName", user.getCompanyName());
-                    model.addAttribute("companyAddress", user.getEmailAddress());
+                    attributeSetter.accept(user, model);
                     model.addAttribute("passwordLength", user.getPassword().length());
                     break;
                 case "Producer":
                     Producer producer = (Producer) userObject;
                     user = producer.getUser();
-                    model.addAttribute("companyName", user.getCompanyName());
-                    model.addAttribute("companyAddress", user.getEmailAddress());
+                    attributeSetter.accept(user, model);
                     break;
                 case "HoReCa":
                     HoReCa hoReCa = (HoReCa) userObject;
                     user = hoReCa.getUser();
-                    model.addAttribute("companyName", user.getCompanyName());
-                    model.addAttribute("companyAddress", user.getEmailAddress());
+                    attributeSetter.accept(user, model);
                     break;
                 default:
                     Processor processor = (Processor) userObject;
-                    user=processor.getUser();
-                    model.addAttribute("companyName", user.getCompanyName());
-                    model.addAttribute("companyAddress", user.getEmailAddress());
+                    user = processor.getUser();
+                    attributeSetter.accept(user, model);
                     break;
             }
         }
@@ -83,6 +90,9 @@ public class AccountController {
 
         return "accountInformation";
     }
+
+
+    //functionnal programming
 
     @GetMapping("/history")
 
@@ -97,25 +107,23 @@ public class AccountController {
         TransportService transportService = new TransportService();
         ProcessingService processingService = new ProcessingService();
         ProductionService productionService = new ProductionService();
-        List<OperationDisplay> operations = new ArrayList();
+
+        List<OperationDisplay> operations = new ArrayList<>();
         List<Transport> transports = new ArrayList<>();
+
         if (userType != null) {
             switch (userType) {
                 case "Processor":
                     Processor processor = (Processor) userObject;
                     List<Processing> processes = processingService.getByProcessorId(processor.getId());
                     transports = transportService.getBySenderId(processor.getUser().getId());
-                    for (Processing processing : processes){
-                        operations.add(processingService.toOperationDisplay(processing));
-                    }
+                    operations.addAll(map(processes, processingService::toOperationDisplay));
                     break;
                 case "Producer":
                     Producer producer = (Producer) userObject;
                     List<Production> productions = productionService.getAllByProducerId(producer.getId());
-                    for (Production production : productions){
-                        operations.add(productionService.toOperationDisplay(production));
-                    }
                     transports = transportService.getBySenderId(producer.getUser().getId());
+                    operations.addAll(map(productions, productionService::toOperationDisplay));
                     break;
                 case "Seller":
                     Seller seller = (Seller) userObject;
@@ -128,15 +136,22 @@ public class AccountController {
             }
         }
 
-        for (Transport transport : transports){
-            operations.add(transportService.toOperationDisplay(transport));
-        }
+        operations.addAll(map(transports, transportService::toOperationDisplay));
 
         sortOperations(operations);
+
         model.addAttribute("operations", operations);
+
         double latency = timer.observeDuration();
-        System.out.println("Latency to get the history of the account : " + latency + " seconds");
+        System.out.println("Latency to get the history of the account: " + latency + " seconds");
+
         return "history";
+    }
+
+    private <T, R> List<R> map(List<T> list, Function<T, R> mapper) {
+        return list.stream()
+                .map(mapper)
+                .collect(Collectors.toList());
     }
 
     @PostMapping("/addNewCertification")
