@@ -1,0 +1,55 @@
+APP Project :
+
+ASPECT : 
+
+LoggingAspect : repertory with function is used and with what arguments
+TimingAspect : Time the function that add an operation
+
+SOLID PRINCIPlES :
+
+AbstractStroableController : 
+
+Single Responsibility Principle (SRP) The methods have a unique and specific purpose (gestion of crud operations Create, Read, Update, Delete)
+
+
+AbstractStroableService : 
+
+Open/Closed Principle (OCP) : provides a base implementation for CRUD operations that can be extended by specific service classes. This allows new functionality to be added by creating new subclasses without modifying existing code.
+
+Interface Segregation Principle (ISP) : Interfaces are specific to customer needs. In this case, the AbstractStorableService abstract class defines an interface to the CRUD operations needed for storage services.
+
+Interface Segregation Principle (ISP) : Specific service classes, such as CertificationTypeService, implement this interface by providing specific implementations for each operation.
+
+Dependency Inversion Principle (DIP): Dependencies are inverted to facilitate extensibility and flexibility. For example, the AbstractClassicDBStorableService class depends on an abstraction (JpaRepository) instead of a concrete implementation. This makes it easy to change the underlying implementation without modifying the code of dependent classes.
+
+
+AbstractClassicDBStorableService :
+
+Liskov Substitution Principle (LSP): Subclasses can be used instead of their base classes without altering the expected behavior. For example, the CertificationTypeService class inherits from AbstractClassicDBStorableService, and it can be used wherever AbstractClassicDBStorableService is expected, without introducing unwanted behavior.
+
+
+CertificationTypeRepository :
+
+Single Responsibility Principle (SRP): The CertificationTypeRepository interface has a single responsibility, which is to define persistence operations specific to the CertificationType entity. This ensures a clear separation of responsibilities between the persistence and domain layers.
+
+Segregation Principle (ISP) interface: The CertificationTypeRepository interface exposes only the persistence operations necessary for the CertificationType entity. This allows customers to use only the methods they need, avoiding the burden of depending on unused features.
+
+Dependency Inversion Principle (DIP): The CertificationTypeRepository interface represents an abstraction of the data repository specific to the CertificationType entity. Classes that need to access CertificationType data depend on this interface rather than a concrete implementation. This makes it easy to replace or modify the underlying implementation without impacting dependent classes.
+
+
+METRICS :
+AccountController : Summary for history (latency)
+ErrorController : Counter for errors
+OperationController : Counter for all the added operations
+ProductController : Summary to get information about a product
+SignController : Gauge to see if someone is connected
+
+SOLID PRINCIPLES : 
+AccountController : history
+Main (selenium tests)
+
+TEST:
+
+TracefoodTest : 1 Unit test (OperationDisplay sort)
+		2 IntegrationTest 
+		4 UI test
