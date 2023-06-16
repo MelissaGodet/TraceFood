@@ -79,6 +79,11 @@ public class ProductController {
     }
 
     private List<OperationDisplay> getOperations( Long productId) {
+        ProductionService productionService = new ProductionService();
+        ProductService productService = new ProductService();
+        ProcessingService processingService = new ProcessingService();
+        TransportService transportService = new TransportService();
+
         Product product = productService.getById(productId);
         List<OperationDisplay> operations = new ArrayList<>();
 
@@ -103,7 +108,9 @@ public class ProductController {
 
     private List<OperationDisplay> addProductOperations(List<Processing> processes, List<Transport> transports, List<Production> productions) {
         List<OperationDisplay> operations = new ArrayList<>();
-
+        ProcessingService processingService = new ProcessingService();
+        TransportService transportService = new TransportService();
+        ProductionService productionService = new ProductionService();
         for (Processing processing : processes) {
             operations.add(processingService.toOperationDisplay(processing));
         }

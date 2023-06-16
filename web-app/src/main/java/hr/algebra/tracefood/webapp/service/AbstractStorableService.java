@@ -10,7 +10,7 @@ import java.util.Objects;
 
 public class AbstractStorableService<T> {
 
-    protected final String BASE_URL = "http://localhost:8080";
+    protected final String BASE_URL = "http://10.42.0.1:8080";
     protected final String url;
     protected final Class<T> responseType;
     protected final RestTemplate restTemplate = new RestTemplate();
