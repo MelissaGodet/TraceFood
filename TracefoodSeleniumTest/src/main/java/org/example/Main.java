@@ -10,6 +10,7 @@ import java.util.function.Function;
 
 public class Main {
 
+    //UI tests
     public static void main(String[] args) throws InterruptedException {
         System.setProperty("webdriver.chrome.driver", "/data/Documents/ING2/algebra/Advanced programming paradigms/chromedriver_linux64/chromedriver");
         ChromeOptions options = new ChromeOptions();
@@ -29,8 +30,8 @@ public class Main {
 
         driver.quit();
     }
-    //functional programming
 
+    //functional programming
     private static void testResearchAboutAProduct(WebDriver driver) {
         executeTest(driver, "Test Search Product", webDriver -> {
             fillInputField(webDriver, By.name("productId"), "15");

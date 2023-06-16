@@ -14,6 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TracefoodTest {
 
+    //Integration test
     @Test
     public void testProcessorCreation() {
         ProcessorService processorService = new ProcessorService();
@@ -24,6 +25,7 @@ public class TracefoodTest {
         assertEquals(expectedProcessor.getUser().getAddress(), actualProcessor.getUser().getAddress());
     }
 
+    //Integration test
     @Test
     public void testProducerDeletion() {
         ProducerService producerService = new ProducerService();
@@ -32,6 +34,7 @@ public class TracefoodTest {
         Assertions.assertThrows(HttpClientErrorException.class, () -> {producerService.getById(producer.getId());});
     }
 
+    //Unit test
     @Test
     public void testSort1Operations() {
         OperationType type = OperationType.PRODUCTION;
@@ -45,6 +48,7 @@ public class TracefoodTest {
         assertEquals(date, new OperationDisplay(date, type, attributs).getDate());
     }
 
+    //Unit test
     @Test
     public void testAlreadySortOperations() {
         OperationType type = OperationType.PRODUCTION;
@@ -71,6 +75,7 @@ public class TracefoodTest {
 
     }
 
+    //Unit test
     @Test
     public void testSortSameOperations() {
         OperationType type = OperationType.PRODUCTION;
@@ -94,6 +99,7 @@ public class TracefoodTest {
         assertEquals(expectedDates, actualDates);
     }
 
+    //Unit test
     @Test
     public void testSort3Operations() {
         LocalDate date1 = LocalDate.of(2022, 6, 15);

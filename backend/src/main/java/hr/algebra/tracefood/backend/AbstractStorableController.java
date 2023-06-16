@@ -7,7 +7,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
-//Single Responsibility Principle (SRP) The methods have unique and specific (management of crud operations Create, Read, Update, Delete)
+//Single Responsibility Principle (SRP) The methods have unique and specific purpose (management of crud operations Create, Read, Update, Delete)
 
 @Controller
 public abstract class AbstractStorableController<T> {
